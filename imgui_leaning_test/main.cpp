@@ -18,7 +18,10 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
-
+#include <string>
+#include <yaml-cpp/yaml.h>
+#include "yaml_reader.h"
+#include <iostream>
 // [Win32] Our example includes a copy of glfw3.lib pre-compiled with VS2010 to maximize ease of testing and compatibility with old VS compilers.
 // To link with VS2010-era libraries, VS2015+ requires linking with legacy_stdio_definitions.lib, which we do using this pragma.
 // Your own project should not be affected, as you are likely to link with a newer binary of GLFW that is adequate for your version of Visual Studio.
@@ -392,7 +395,7 @@ int main(int, char**)
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
     io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
     // io.ConfigViewportsNoAutoMerge = true;
-    // io.ConfigViewportsNoTaskBarIcon = true;
+    io.ConfigViewportsNoTaskBarIcon = true;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
@@ -473,7 +476,7 @@ int main(int, char**)
     bool show_demo_window = true;
     bool show_another_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+    bool bad_file = false;
     // Main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -495,6 +498,7 @@ int main(int, char**)
                 ImGui_ImplVulkanH_CreateOrResizeWindow(g_Instance, g_PhysicalDevice, g_Device, &g_MainWindowData, g_QueueFamily, g_Allocator, width, height, g_MinImageCount);
                 g_MainWindowData.FrameIndex = 0;
                 g_SwapChainRebuild = false;
+
             }
         }
 
@@ -507,13 +511,54 @@ int main(int, char**)
         if (show_demo_window)
             ImGui::ShowDemoWindow(&show_demo_window);
 
+        {
+            ImGui::Begin("YAML visualizer");
+            ImGui::Text("Input the Yaml Path");
+            static char yaml_path[128] = "";
+            ImGui::InputText(" ", yaml_path, IM_ARRAYSIZE(yaml_path));
+            try
+            {
+            if (ImGui::Button("Load")){
+                    ImGui::Text("The lazy \n\n\n ",6);
+
+                //     YAML::Node* docu;
+                //   bool ok = yaml_file::yaml_parser(yaml_path,docu);
+                //   if(ok){
+                //     ImGui::Text("jkgvugfv", 10);
+
+                  }
+                    bad_file = false;
+            }
+            
+            catch(const std::exception& e)
+            {   
+                bad_file = true;
+                std::cerr << e.what() << '\n';
+            }
+            if(bad_file)
+            {
+                bad_file = true;
+                ImGui::SameLine();
+                ImGui::Text("Bad File");
+            }
+                           // Display some text (you can use a format strings too)
+            ImGui::End();
+        }
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
         {
             static float f = 0.0f;
             static int counter = 0;
+            ImGui::Begin("Hello, world!");
+                        static char password[64] = "password123";
 
-            ImGui::Begin("Hello, world!");                          // Create a window called "Hello, world!" and append into it.
+            ImGui::InputTextWithHint("password (w/ hint)", "<password>", password, IM_ARRAYSIZE(password), ImGuiInputTextFlags_Password);
+            ImGui::InputText("password (clear)", password, IM_ARRAYSIZE(password));
 
+            ImGui::SameLine();
+
+            // ImGui::Text(str0);
+            // ImGui::SameLine();
+            // ImGui::InputText("##text1", buf1, 240);
             ImGui::Text("This is some useful text.");               // Display some text (you can use a format strings too)
             ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our window open/close state
             ImGui::Checkbox("Another Window", &show_another_window);
@@ -521,24 +566,28 @@ int main(int, char**)
             ImGui::SliderFloat("float", &f, 0.0f, 1.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
             ImGui::ColorEdit3("clear color", (float*)&clear_color); // Edit 3 floats representing a color
 
-            if (ImGui::Button("Button"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+            if (ImGui::Button("Add"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
                 counter++;
             ImGui::SameLine();
+            if (ImGui::Button("Reset"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                counter=0;
+            if (ImGui::Button("Negate"))                            // Buttons return true when clicked (most widgets return true when edited/activated)
+                counter--;
+            ImGui::SameLine();
             ImGui::Text("counter = %d", counter);
-
             ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
             ImGui::End();
         }
 
         // 3. Show another simple window.
-        if (show_another_window)
-        {
-            ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-            ImGui::Text("Hello from another window!");
-            if (ImGui::Button("Close Me"))
-                show_another_window = false;
-            ImGui::End();
-        }
+        // if (show_another_window)
+        // {
+        //     ImGui::Begin("Another Window", &show_another_window);   // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+        //     ImGui::Text("Hello from another window!");
+        //     if (ImGui::Button("Close Me"))
+        //         show_another_window = false;
+        //     ImGui::End();
+        // }
 
         // Rendering
         ImGui::Render();
