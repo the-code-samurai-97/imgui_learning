@@ -3,10 +3,10 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 cc_library(
     name = "imgui",
     srcs = glob([
-        "imgui/*.cpp",
+        "imgui/*.cpp","yaml_reader.h",
     ]),
     hdrs = glob([
-        "imgui/*.h",
+        "imgui/*.h","yaml_reader.h",
     ]),
     linkopts = [
         "-lglfw",
